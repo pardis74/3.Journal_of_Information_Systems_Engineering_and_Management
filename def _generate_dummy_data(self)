@@ -1,9 +1,9 @@
-def _generate_dummy_data(self):
-  """
-  Generates dummy time-series data for demonstration purposes.
-  In a real scenario, this would be actual DWT coefficients from voltage waveforms.
-  """
-  X = np.random.rand(self.num_samples, self.sequence_length, 1) # LSTM expects 3D input: (samples, timesteps, features)
-  y = np.random.randint(0, self.num_classes, self.num_samples) # Binary classification: ferroresonance (1) or not (0)
-  print(f"Generated dummy data: X shape {X.shape}, y shape {y.shape}")
-  return X, y
+    def _generate_dummy_data(self):
+        """
+        Generates dummy time-series data for demonstration purposes.
+        In a real scenario, this would be actual DWT coefficients from voltage waveforms.
+        """
+        X = np.random.rand(self.num_samples, self.sequence_length, 1) # LSTM expects 3D input: (samples, timesteps, features)
+        y = np.random.randint(0, self.num_classes, self.num_samples) # Binary classification: ferroresonance (1) or not (0)
+        print(f"Generated dummy data: X shape {X.shape}, y shape {y.shape}")
+        return X, y
