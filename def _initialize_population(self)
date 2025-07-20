@@ -1,0 +1,17 @@
+    def _initialize_population(self):
+        """
+        Initializes the first population of chromosomes.
+        Each chromosome contains (num_hidden_units, max_epochs, W_acc, W_time).
+        [cite_start]Paper mentions num_hidden_units up to 50, max_epochs 15[cite: 99, 100].
+        W_acc and W_time are weight coefficients for accuracy and time in fitness function.
+        """
+        population = []
+        for _ in range(self.pop_size):
+            [cite_start]num_hidden_units = random.randint(10, 50) # Example range, max 50 [cite: 99]
+            [cite_start]max_epochs = random.randint(5, 15) # Example range, max 15 [cite: 100]
+            # Random weights for accuracy and time in the fitness function
+            W_acc = random.uniform(0.5, 1.5)
+            W_time = random.uniform(0.5, 1.5)
+            population.append({'num_hidden_units': num_hidden_units, 'max_epochs': max_epochs, 'W_acc': W_acc, 'W_time': W_time})
+        print(f"Initial population of {self.pop_size} chromosomes created.")
+        return population
