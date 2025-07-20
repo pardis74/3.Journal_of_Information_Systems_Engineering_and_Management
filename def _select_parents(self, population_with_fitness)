@@ -1,0 +1,11 @@
+    def _select_parents(self, population_with_fitness):
+        """
+        Selects parents for crossover based on their fitness (e.g., roulette wheel selection).
+        """
+        # [cite_start]Sort population by fitness in descending order [cite: 107]
+        sorted_population = sorted(population_with_fitness, key=lambda x: x['fitness'], reverse=True)
+        # Select the top chromosomes for mating pool (simplified for demonstration)
+        mating_pool_size = int(len(sorted_population) * self.crossover_rate)
+        parents = sorted_population[:mating_pool_size]
+        print(f"Selected {len(parents)} parents for crossover.")
+        return [p['chromosome'] for p in parents]
