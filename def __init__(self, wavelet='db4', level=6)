@@ -1,0 +1,3 @@
+    [cite_start]def __init__(self, wavelet='db4', level=6): # Paper mentions up to six levels of coefficients [cite: 5, 94]
+        self.wavelet = wavelet
+        self.level = level
