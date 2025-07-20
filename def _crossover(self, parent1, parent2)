@@ -1,0 +1,13 @@
+    def _crossover(self, parent1, parent2):
+        """
+        Performs crossover between two parent chromosomes.
+        Simple single-point crossover for demonstration.
+        """
+        child1 = parent1.copy()
+        child2 = parent2.copy()
+        
+        # Crossover point (e.g., swap num_hidden_units)
+        child1['num_hidden_units'] = parent2['num_hidden_units']
+        child2['num_hidden_units'] = parent1['num_hidden_units']
+        print("Crossover performed.")
+        return child1, child2
