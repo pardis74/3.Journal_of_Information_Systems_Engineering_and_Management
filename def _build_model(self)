@@ -1,0 +1,14 @@
+    def _build_model(self):
+        """
+        Builds the Keras LSTM model.
+        """
+        model = Sequential([
+            LSTM(self.num_hidden_units, activation='tanh', input_shape=self.input_shape),
+            Dropout(0.2), # Adding dropout for regularization
+            Dense(self.num_classes, activation='softmax') if self.num_classes > 1 else Dense(1, activation='sigmoid')
+        ])
+        optimizer = Adam(learning_rate=self.learning_rate)
+        model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy' if self.num_classes > 1 else 'binary_crossentropy', metrics=['accuracy'])
+        print(f"LSTM model built with {self.num_hidden_units} hidden units and learning rate {self.learning_rate}.")
+        model.summary()
+        return model
