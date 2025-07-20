@@ -1,0 +1,20 @@
+    def decompose(self, signal):
+        """
+        Performs multi-level DWT decomposition on a single signal.
+        Returns approximation and detail coefficients for each level.
+        [cite_start]The paper uses detail coefficients as input features for LSTM[cite: 153].
+        """
+        if not isinstance(signal, (np.ndarray, list)):
+            raise ValueError("Input signal must be a numpy array or list.")
+        
+        # Perform DWT decomposition
+        coefficients = pywt.wavedec(signal, self.wavelet, level=self.level)
+        
+        # The first element is the approximation coefficients, the rest are detail coefficients
+        approximation_coeffs = coefficients[0]
+        detail_coeffs = coefficients[1:] # A list of arrays, one for each level of detail coefficients
+
+        print(f"Wavelet decomposition performed. Approximation coeffs shape: {approximation_coeffs.shape}")
+        print(f"Detail coeffs (list of shapes): {[d.shape for d in detail_coeffs]}")
+        
+        return approximation_coeffs, detail_coeffs
