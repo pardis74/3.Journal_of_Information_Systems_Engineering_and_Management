@@ -1,0 +1,21 @@
+    def evaluate(self, X_test, y_test):
+        """
+        Evaluates the LSTM model's performance on test data.
+        """
+        print("Evaluating LSTM model...")
+        loss, accuracy = self.model.evaluate(X_test, y_test, verbose=0)
+        y_pred_probs = self.model.predict(X_test, verbose=0)
+        y_pred = np.argmax(y_pred_probs, axis=1) if self.num_classes > 1 else (y_pred_probs > 0.5).astype(int)
+
+        precision = precision_score(y_test, y_pred, average='binary' if self.num_classes == 2 else 'weighted')
+        recall = recall_score(y_test, y_pred, average='binary' if self.num_classes == 2 else 'weighted')
+        f1 = f1_score(y_test, y_pred, average='binary' if self.num_classes == 2 else 'weighted')
+
+        metrics = {
+            "accuracy": accuracy,
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1
+        }
+        print("LSTM model evaluation complete.")
+        return metrics
