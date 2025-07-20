@@ -1,0 +1,157 @@
+class GeneticAlgorithm:
+    """
+    Implements a Genetic Algorithm to optimize LSTM parameters.
+    Optimizes `num_hidden_units` and `epochs` based on a fitness function.
+    """
+    [cite_start]def __init__(self, data_loader, pop_size=100, num_generations=15, # Num iterations [cite: 154]
+                 [cite_start]mutation_rate=0.3, crossover_rate=0.7): # Probabilities [cite: 154]
+        self.data_loader = data_loader
+        self.pop_size = pop_size
+        self.num_generations = num_generations
+        self.mutation_rate = mutation_rate
+        self.crossover_rate = crossover_rate
+        self.X, self.y = self.data_loader.get_data()
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.X, self.y, test_size=0.2, random_state=42
+        )
+        print(f"GA initialized with pop_size={pop_size}, num_generations={num_generations}")
+
+    def _initialize_population(self):
+        """
+        Initializes the first population of chromosomes.
+        Each chromosome contains (num_hidden_units, max_epochs, W_acc, W_time).
+        [cite_start]Paper mentions num_hidden_units up to 50, max_epochs 15[cite: 99, 100].
+        W_acc and W_time are weight coefficients for accuracy and time in fitness function.
+        """
+        population = []
+        for _ in range(self.pop_size):
+            [cite_start]num_hidden_units = random.randint(10, 50) # Example range, max 50 [cite: 99]
+            [cite_start]max_epochs = random.randint(5, 15) # Example range, max 15 [cite: 100]
+            # Random weights for accuracy and time in the fitness function
+            W_acc = random.uniform(0.5, 1.5)
+            W_time = random.uniform(0.5, 1.5)
+            population.append({'num_hidden_units': num_hidden_units, 'max_epochs': max_epochs, 'W_acc': W_acc, 'W_time': W_time})
+        print(f"Initial population of {self.pop_size} chromosomes created.")
+        return population
+
+    def _calculate_fitness(self, chromosome):
+        """
+        Calculates the fitness of a chromosome by training and evaluating an LSTM model.
+        [cite_start]Fitness function: fitness_GA = (W_acc * LSTM_Accuracy) / (1 + W_time * LSTM_Training_Time) [cite: 103]
+        """
+        num_hidden_units = chromosome['num_hidden_units']
+        max_epochs = chromosome['max_epochs']
+        W_acc = chromosome['W_acc']
+        W_time = chromosome['W_time']
+
+        # Train and evaluate LSTM model
+        lstm_model = LSTMModel(input_shape=(self.data_loader.sequence_length, 1),
+                               num_hidden_units=num_hidden_units,
+                               [cite_start]learning_rate=0.001) # Learning rate is fixed as per paper [cite: 100]
+        
+        import time
+        start_time = time.time()
+        history = lstm_model.train(self.X_train, self.y_train, epochs=max_epochs, validation_split=0.2)
+        training_time = time.time() - start_time
+
+        eval_metrics = lstm_model.evaluate(self.X_test, self.y_test)
+        accuracy = eval_metrics['accuracy']
+
+        # Ensure no division by zero or overly small numbers for training time
+        fitness = (W_acc * accuracy) / (1 + W_time * training_time)
+        print(f"Chromosome fitness: Accuracy={accuracy:.4f}, Training Time={training_time:.2f}s, Fitness={fitness:.4f}")
+        return fitness, accuracy, training_time
+
+    def _select_parents(self, population_with_fitness):
+        """
+        Selects parents for crossover based on their fitness (e.g., roulette wheel selection).
+        """
+        # [cite_start]Sort population by fitness in descending order [cite: 107]
+        sorted_population = sorted(population_with_fitness, key=lambda x: x['fitness'], reverse=True)
+        # Select the top chromosomes for mating pool (simplified for demonstration)
+        mating_pool_size = int(len(sorted_population) * self.crossover_rate)
+        parents = sorted_population[:mating_pool_size]
+        print(f"Selected {len(parents)} parents for crossover.")
+        return [p['chromosome'] for p in parents]
+
+    def _crossover(self, parent1, parent2):
+        """
+        Performs crossover between two parent chromosomes.
+        Simple single-point crossover for demonstration.
+        """
+        child1 = parent1.copy()
+        child2 = parent2.copy()
+        
+        # Crossover point (e.g., swap num_hidden_units)
+        child1['num_hidden_units'] = parent2['num_hidden_units']
+        child2['num_hidden_units'] = parent1['num_hidden_units']
+        print("Crossover performed.")
+        return child1, child2
+
+    def _mutate(self, chromosome):
+        """
+        Applies mutation to a chromosome.
+        Randomly adjust hidden units or epochs.
+        """
+        if random.random() < self.mutation_rate:
+            if random.random() < 0.5:
+                chromosome['num_hidden_units'] = random.randint(10, 50)
+                print(f"Mutated num_hidden_units to {chromosome['num_hidden_units']}")
+            else:
+                chromosome['max_epochs'] = random.randint(5, 15)
+                print(f"Mutated max_epochs to {chromosome['max_epochs']}")
+        return chromosome
+
+    def optimize(self):
+        """
+        Runs the genetic algorithm optimization process.
+        """
+        population = self._initialize_population()
+        best_chromosome = None
+        best_fitness = -np.inf
+
+        for generation in range(self.num_generations):
+            print(f"\n--- Generation {generation + 1}/{self.num_generations} ---")
+            population_with_fitness = []
+            for i, chromosome in enumerate(population):
+                print(f"Calculating fitness for chromosome {i+1}/{len(population)}: {chromosome}")
+                fitness, accuracy, training_time = self._calculate_fitness(chromosome)
+                population_with_fitness.append({'chromosome': chromosome, 'fitness': fitness, 
+                                                'accuracy': accuracy, 'training_time': training_time})
+                
+                if fitness > best_fitness:
+                    best_fitness = fitness
+                    best_chromosome = chromosome
+                    print(f"New best chromosome found: {best_chromosome}, Fitness: {best_fitness:.4f}")
+
+            # Select parents for the next generation
+            parents = self._select_parents(population_with_fitness)
+
+            # Create next generation
+            next_population = []
+            # Keep the best from current population (elitism - simplified)
+            next_population.append(best_chromosome) 
+            
+            while len(next_population) < self.pop_size:
+                if len(parents) < 2: # Ensure enough parents for crossover
+                    parent1 = random.choice(population_with_fitness)['chromosome']
+                    parent2 = random.choice(population_with_fitness)['chromosome']
+                else:
+                    parent1, parent2 = random.sample(parents, 2)
+                
+                if random.random() < self.crossover_rate:
+                    child1, child2 = self._crossover(parent1, parent2)
+                    next_population.append(self._mutate(child1))
+                    if len(next_population) < self.pop_size:
+                        next_population.append(self._mutate(child2))
+                else:
+                    next_population.append(self._mutate(parent1))
+                    if len(next_population) < self.pop_size:
+                        next_population.append(self._mutate(parent2))
+
+            population = next_population[:self.pop_size] # Ensure population size is maintained
+            print(f"Population size for next generation: {len(population)}")
+
+        print("\n--- GA Optimization Complete ---")
+        print(f"Optimal LSTM parameters found: {best_chromosome}")
+        return best_chromosome
