@@ -1,0 +1,13 @@
+    def _mutate(self, chromosome):
+        """
+        Applies mutation to a chromosome.
+        Randomly adjust hidden units or epochs.
+        """
+        if random.random() < self.mutation_rate:
+            if random.random() < 0.5:
+                chromosome['num_hidden_units'] = random.randint(10, 50)
+                print(f"Mutated num_hidden_units to {chromosome['num_hidden_units']}")
+            else:
+                chromosome['max_epochs'] = random.randint(5, 15)
+                print(f"Mutated max_epochs to {chromosome['max_epochs']}")
+        return chromosome
