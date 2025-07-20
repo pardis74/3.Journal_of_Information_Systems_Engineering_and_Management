@@ -1,0 +1,5 @@
+    def __init__(self, num_samples=1000, sequence_length=18, num_classes=2):
+        self.num_samples = num_samples
+        [cite_start]self.sequence_length = sequence_length # Corresponds to 18 time-series features (6 detail coefficients for 3 phases) [cite: 97]
+        self.num_classes = num_classes
+        self.X, self.y = self._generate_dummy_data()
