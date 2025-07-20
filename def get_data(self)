@@ -1,0 +1,5 @@
+    def get_data(self):
+        """
+        Returns the generated dataset.
+        """
+        return self.X, self.y
