@@ -1,0 +1,9 @@
+    def train(self, X_train, y_train, epochs=15, batch_size=32, validation_split=0.2):
+        """
+        Trains the LSTM model.
+        [cite_start]MaxEpochs is considered 15[cite: 100].
+        """
+        print(f"Training LSTM model for {epochs} epochs...")
+        history = self.model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, validation_split=validation_split, verbose=0)
+        print("LSTM model training complete.")
+        return history
