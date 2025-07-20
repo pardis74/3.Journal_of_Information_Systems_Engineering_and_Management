@@ -1,0 +1,12 @@
+    [cite_start]def __init__(self, data_loader, pop_size=100, num_generations=15, # Num iterations [cite: 154]
+                 [cite_start]mutation_rate=0.3, crossover_rate=0.7): # Probabilities [cite: 154]
+        self.data_loader = data_loader
+        self.pop_size = pop_size
+        self.num_generations = num_generations
+        self.mutation_rate = mutation_rate
+        self.crossover_rate = crossover_rate
+        self.X, self.y = self.data_loader.get_data()
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(
+            self.X, self.y, test_size=0.2, random_state=42
+        )
+        print(f"GA initialized with pop_size={pop_size}, num_generations={num_generations}")
