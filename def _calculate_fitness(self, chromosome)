@@ -1,0 +1,27 @@
+    def _calculate_fitness(self, chromosome):
+        """
+        Calculates the fitness of a chromosome by training and evaluating an LSTM model.
+        [cite_start]Fitness function: fitness_GA = (W_acc * LSTM_Accuracy) / (1 + W_time * LSTM_Training_Time) [cite: 103]
+        """
+        num_hidden_units = chromosome['num_hidden_units']
+        max_epochs = chromosome['max_epochs']
+        W_acc = chromosome['W_acc']
+        W_time = chromosome['W_time']
+
+        # Train and evaluate LSTM model
+        lstm_model = LSTMModel(input_shape=(self.data_loader.sequence_length, 1),
+                               num_hidden_units=num_hidden_units,
+                               [cite_start]learning_rate=0.001) # Learning rate is fixed as per paper [cite: 100]
+        
+        import time
+        start_time = time.time()
+        history = lstm_model.train(self.X_train, self.y_train, epochs=max_epochs, validation_split=0.2)
+        training_time = time.time() - start_time
+
+        eval_metrics = lstm_model.evaluate(self.X_test, self.y_test)
+        accuracy = eval_metrics['accuracy']
+
+        # Ensure no division by zero or overly small numbers for training time
+        fitness = (W_acc * accuracy) / (1 + W_time * training_time)
+        print(f"Chromosome fitness: Accuracy={accuracy:.4f}, Training Time={training_time:.2f}s, Fitness={fitness:.4f}")
+        return fitness, accuracy, training_time
