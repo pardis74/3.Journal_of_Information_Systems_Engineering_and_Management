@@ -1,0 +1,27 @@
+class DataLoader:
+    """
+    A class to simulate loading and preparing data for the LSTM and GA.
+    In a real application, this would involve processing data from PSCAD simulations
+    and performing DWT feature extraction as described in the paper.
+    """
+    def __init__(self, num_samples=1000, sequence_length=18, num_classes=2):
+        self.num_samples = num_samples
+        [cite_start]self.sequence_length = sequence_length # Corresponds to 18 time-series features (6 detail coefficients for 3 phases) [cite: 97]
+        self.num_classes = num_classes
+        self.X, self.y = self._generate_dummy_data()
+
+    def _generate_dummy_data(self):
+        """
+        Generates dummy time-series data for demonstration purposes.
+        In a real scenario, this would be actual DWT coefficients from voltage waveforms.
+        """
+        X = np.random.rand(self.num_samples, self.sequence_length, 1) # LSTM expects 3D input: (samples, timesteps, features)
+        y = np.random.randint(0, self.num_classes, self.num_samples) # Binary classification: ferroresonance (1) or not (0)
+        print(f"Generated dummy data: X shape {X.shape}, y shape {y.shape}")
+        return X, y
+
+    def get_data(self):
+        """
+        Returns the generated dataset.
+        """
+        return self.X, self.y
