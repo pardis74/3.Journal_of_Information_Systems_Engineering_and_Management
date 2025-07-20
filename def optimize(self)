@@ -1,0 +1,53 @@
+    def optimize(self):
+        """
+        Runs the genetic algorithm optimization process.
+        """
+        population = self._initialize_population()
+        best_chromosome = None
+        best_fitness = -np.inf
+
+        for generation in range(self.num_generations):
+            print(f"\n--- Generation {generation + 1}/{self.num_generations} ---")
+            population_with_fitness = []
+            for i, chromosome in enumerate(population):
+                print(f"Calculating fitness for chromosome {i+1}/{len(population)}: {chromosome}")
+                fitness, accuracy, training_time = self._calculate_fitness(chromosome)
+                population_with_fitness.append({'chromosome': chromosome, 'fitness': fitness, 
+                                                'accuracy': accuracy, 'training_time': training_time})
+                
+                if fitness > best_fitness:
+                    best_fitness = fitness
+                    best_chromosome = chromosome
+                    print(f"New best chromosome found: {best_chromosome}, Fitness: {best_fitness:.4f}")
+
+            # Select parents for the next generation
+            parents = self._select_parents(population_with_fitness)
+
+            # Create next generation
+            next_population = []
+            # Keep the best from current population (elitism - simplified)
+            next_population.append(best_chromosome) 
+            
+            while len(next_population) < self.pop_size:
+                if len(parents) < 2: # Ensure enough parents for crossover
+                    parent1 = random.choice(population_with_fitness)['chromosome']
+                    parent2 = random.choice(population_with_fitness)['chromosome']
+                else:
+                    parent1, parent2 = random.sample(parents, 2)
+                
+                if random.random() < self.crossover_rate:
+                    child1, child2 = self._crossover(parent1, parent2)
+                    next_population.append(self._mutate(child1))
+                    if len(next_population) < self.pop_size:
+                        next_population.append(self._mutate(child2))
+                else:
+                    next_population.append(self._mutate(parent1))
+                    if len(next_population) < self.pop_size:
+                        next_population.append(self._mutate(parent2))
+
+            population = next_population[:self.pop_size] # Ensure population size is maintained
+            print(f"Population size for next generation: {len(population)}")
+
+        print("\n--- GA Optimization Complete ---")
+        print(f"Optimal LSTM parameters found: {best_chromosome}")
+        return best_chromosome
